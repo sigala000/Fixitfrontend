@@ -30,7 +30,7 @@ export const ArtisanOnboardingScreen = ({ navigation }: any) => {
             // Convert comma-separated skills to array
             const skillsArray = skills.split(',').map(s => s.trim());
 
-            const response = await fetch(`${API_URL}/artisans/${user.id}/profile`, {
+            const response = await fetch(`${API_URL}/artisan/${user.id}/profile`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',

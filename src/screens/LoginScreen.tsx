@@ -22,7 +22,15 @@ export const LoginScreen = ({ navigation }: any) => {
 
             // Check user role and navigate accordingly
             if (response.user.role === 'artisan') {
-                navigation.replace('ArtisanTabs');
+                const onboardingStep = response.user.profile?.onboardingStep || 0;
+
+                if (onboardingStep === 0) {
+                    navigation.replace('ArtisanQuestionnaire');
+                } else if (onboardingStep === 1) {
+                    navigation.replace('ArtisanIDUpload');
+                } else {
+                    navigation.replace('ArtisanTabs');
+                }
             } else {
                 navigation.replace('ClientTabs');
             }

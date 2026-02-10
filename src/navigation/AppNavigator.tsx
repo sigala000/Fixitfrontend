@@ -25,6 +25,8 @@ import { ConversationsListScreen } from '../screens/ConversationsListScreen';
 import { PaymentMethodsScreen } from '../screens/PaymentMethodsScreen';
 import { LanguageScreen } from '../screens/LanguageScreen';
 import { HelpSupportScreen } from '../screens/HelpSupportScreen';
+import { ArtisanQuestionnaireScreen } from '../screens/ArtisanQuestionnaireScreen';
+import { ArtisanIDUploadScreen } from '../screens/ArtisanIDUploadScreen';
 import { ClientNavigator } from './ClientNavigator';
 import { ArtisanNavigator } from './ArtisanNavigator';
 
@@ -60,7 +62,12 @@ export const AppNavigator = () => {
                 <Stack.Screen name="ClientServiceHistory" component={ClientServiceHistoryScreen} />
 
                 {/* Artisan Flow */}
+
+
+                {/* Artisan Flow */}
                 <Stack.Screen name="ArtisanOnboarding" component={ArtisanOnboardingScreen} />
+                <Stack.Screen name="ArtisanQuestionnaire" component={ArtisanQuestionnaireScreen} />
+                <Stack.Screen name="ArtisanIDUpload" component={ArtisanIDUploadScreen} />
                 <Stack.Screen name="ArtisanDashboard" component={ArtisanDashboardScreen} />
                 <Stack.Screen name="ArtisanJobRequest" component={ArtisanJobRequestScreen} />
                 <Stack.Screen name="ArtisanEditProfile" component={ArtisanEditProfileScreen} />
