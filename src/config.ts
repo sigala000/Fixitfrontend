@@ -6,6 +6,7 @@ import { Platform } from 'react-native';
 // For iOS Simulator, 'http://localhost:8000/api' works
 
 const BASE_URL = 'https://fixitbackend-dzn1.onrender.com';
+// const BASE_URL = 'http://192.168.43.5:8000'; // Local testing
 
 export const API_URL = `${BASE_URL}/api`;
 export const SERVER_URL = BASE_URL; // Exporting as SERVER_URL for clarity

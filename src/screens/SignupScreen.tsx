@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AuthService } from '../services/auth';
 import { useTheme } from '../context/ThemeContext';
+import { API_URL } from '../config';
 
 export const SignupScreen = ({ route, navigation }: any) => {
     const { theme } = useTheme();
@@ -9,6 +11,7 @@ export const SignupScreen = ({ route, navigation }: any) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [role, setRole] = useState<'customer' | 'artisan'>(initialRole === 'client' ? 'customer' : initialRole === 'artisan' ? 'artisan' : 'customer');
     const [loading, setLoading] = useState(false);
 
@@ -29,7 +32,7 @@ export const SignupScreen = ({ route, navigation }: any) => {
 
             // Navigate directly to appropriate tabs based on role
             if (role === 'artisan') {
-                navigation.replace('ArtisanTabs');
+                navigation.replace('ArtisanQuestionnaire'); // New artisans should go to questionnaire
             } else {
                 navigation.replace('ClientTabs');
             }
@@ -81,14 +84,26 @@ export const SignupScreen = ({ route, navigation }: any) => {
                         autoCapitalize="none"
                         keyboardType="email-address"
                     />
-                    <TextInput
-                        style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
-                        placeholder="Password"
-                        placeholderTextColor={theme.textSecondary}
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                    />
+                    <View style={styles.passwordContainer}>
+                        <TextInput
+                            style={[styles.input, styles.passwordInput, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+                            placeholder="Password"
+                            placeholderTextColor={theme.textSecondary}
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry={!showPassword}
+                        />
+                        <TouchableOpacity
+                            style={styles.eyeIcon}
+                            onPress={() => setShowPassword(!showPassword)}
+                        >
+                            <Ionicons
+                                name={showPassword ? "eye-off" : "eye"}
+                                size={24}
+                                color={theme.textSecondary}
+                            />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 <TouchableOpacity style={[styles.button, { backgroundColor: theme.primary }]} onPress={handleSignup} disabled={loading}>
@@ -102,6 +117,12 @@ export const SignupScreen = ({ route, navigation }: any) => {
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                     <Text style={[styles.linkText, { color: theme.primary }]}>Already have an account? Login</Text>
                 </TouchableOpacity>
+
+                <View style={styles.debugContainer}>
+                    <Text style={styles.debugText}>
+                        Debug Config: {API_URL}
+                    </Text>
+                </View>
             </ScrollView>
         </KeyboardAvoidingView>
     );
@@ -147,6 +168,23 @@ const styles = StyleSheet.create({
         fontSize: 16,
         borderWidth: 1,
     },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        position: 'relative',
+        marginBottom: 15,
+    },
+    passwordInput: {
+        flex: 1,
+        marginBottom: 0,
+        paddingRight: 50,
+    },
+    eyeIcon: {
+        position: 'absolute',
+        right: 15,
+        height: '100%',
+        justifyContent: 'center',
+    },
     button: {
         padding: 15,
         borderRadius: 10,
@@ -160,5 +198,16 @@ const styles = StyleSheet.create({
     linkText: {
         textAlign: 'center',
         fontSize: 14,
+    },
+    debugContainer: {
+        marginTop: 20,
+        padding: 10,
+        backgroundColor: '#333',
+        borderRadius: 5,
+    },
+    debugText: {
+        color: '#fff',
+        fontSize: 10,
+        textAlign: 'center',
     },
 });

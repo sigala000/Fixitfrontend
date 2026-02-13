@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { AuthService } from '../services/auth';
 import { API_URL } from '../config';
 import { useTheme } from '../context/ThemeContext';
@@ -8,6 +9,7 @@ export const LoginScreen = ({ navigation }: any) => {
     const { theme } = useTheme();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const handleLogin = async () => {
@@ -36,8 +38,8 @@ export const LoginScreen = ({ navigation }: any) => {
             }
         } catch (error: any) {
             Alert.alert(
-                'Connection Failed',
-                `Error: ${error.message}\n\nAttempted URL: ${API_URL}/auth/login\n\nPlease ensure your phone is on the same Wi-Fi as your computer.`
+                'Login Failed',
+                error.message || 'An error occurred during login. Please try again.'
             );
         } finally {
             setLoading(false);
@@ -63,14 +65,26 @@ export const LoginScreen = ({ navigation }: any) => {
                         autoCapitalize="none"
                         keyboardType="email-address"
                     />
-                    <TextInput
-                        style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
-                        placeholder="Password"
-                        placeholderTextColor={theme.textSecondary}
-                        value={password}
-                        onChangeText={setPassword}
-                        secureTextEntry
-                    />
+                    <View style={styles.passwordContainer}>
+                        <TextInput
+                            style={[styles.input, styles.passwordInput, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
+                            placeholder="Password"
+                            placeholderTextColor={theme.textSecondary}
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry={!showPassword}
+                        />
+                        <TouchableOpacity
+                            style={styles.eyeIcon}
+                            onPress={() => setShowPassword(!showPassword)}
+                        >
+                            <Ionicons
+                                name={showPassword ? "eye-off" : "eye"}
+                                size={24}
+                                color={theme.textSecondary}
+                            />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 <TouchableOpacity style={[styles.button, { backgroundColor: theme.primary }]} onPress={handleLogin} disabled={loading}>
@@ -119,6 +133,23 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         fontSize: 16,
         borderWidth: 1,
+    },
+    passwordContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        position: 'relative',
+        marginBottom: 15,
+    },
+    passwordInput: {
+        flex: 1,
+        marginBottom: 0,
+        paddingRight: 50,
+    },
+    eyeIcon: {
+        position: 'absolute',
+        right: 15,
+        height: '100%',
+        justifyContent: 'center',
     },
     button: {
         padding: 15,

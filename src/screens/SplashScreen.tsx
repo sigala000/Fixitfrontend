@@ -17,12 +17,27 @@ export const SplashScreen = () => {
                 const user = await AsyncStorage.getItem('user');
 
                 if (user) {
-                    // Check role and navigate accordingly
                     const userData = JSON.parse(user);
-                    if (userData.userType === 'ARTISAN') {
-                        navigation.replace('ArtisanTabs');
+                    console.log("Splash Screen - User Logic:", {
+                        role: userData.role,
+                        onboardingStep: userData.profile?.onboardingStep,
+                        id: userData.id || userData._id
+                    });
+
+                    // Check role and navigate accordingly
+                    if (userData.role === 'artisan') {
+                        const onboardingStep = userData.profile?.onboardingStep || 0;
+
+                        if (onboardingStep === 0) {
+                            navigation.replace('ArtisanQuestionnaire');
+                        } else if (onboardingStep === 1) {
+                            navigation.replace('ArtisanIDUpload');
+                        } else {
+                            navigation.replace('ArtisanTabs');
+                        }
                     } else {
-                        navigation.replace('ClientTabs'); // Or Home
+                        // All non-artisans (customers/admins) go to client tabs for now
+                        navigation.replace('ClientTabs');
                     }
                 } else if (!hasSeenOnboarding) {
                     navigation.replace('Onboarding');
