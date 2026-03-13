@@ -3,7 +3,7 @@ export const lightTheme = {
     surface: '#F5F5F5',
     text: '#000000',
     textSecondary: '#666666',
-    primary: '#CCFF00', // Lime Green
+    primary: '#A4C600', // Darker Lime Green for better contrast in white mode
     border: '#E0E0E0',
     card: '#FFFFFF',
     white: '#FFFFFF',

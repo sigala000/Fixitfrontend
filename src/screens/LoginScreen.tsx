@@ -2,10 +2,14 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthService } from '../services/auth';
+import { UserService } from '../services/user';
+import { LocationService } from '../services/location';
 import { API_URL } from '../config';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 
 export const LoginScreen = ({ navigation }: any) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -36,6 +40,18 @@ export const LoginScreen = ({ navigation }: any) => {
             } else {
                 navigation.replace('ClientTabs');
             }
+
+            try {
+                const location = await LocationService.getCurrentLocation();
+                if (location) {
+                    const userId = response.user.id || response.user._id;
+                    await UserService.updateProfile(userId, {
+                        location: [location.longitude, location.latitude]
+                    });
+                }
+            } catch (locError) {
+                console.error('Failed to update location after login:', locError);
+            }
         } catch (error: any) {
             Alert.alert(
                 'Login Failed',
@@ -52,13 +68,13 @@ export const LoginScreen = ({ navigation }: any) => {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
             <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}>
-                <Text style={[styles.title, { color: theme.text }]}>Welcome Back</Text>
-                <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Sign in to continue</Text>
+                <Text style={[styles.title, { color: theme.text }]}>{t('login.title') || 'Welcome Back'}</Text>
+                <Text style={[styles.subtitle, { color: theme.textSecondary }]}>{t('login.subtitle') || 'Sign in to continue'}</Text>
 
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
-                        placeholder="Email"
+                        placeholder={t('auth.email')}
                         placeholderTextColor={theme.textSecondary}
                         value={email}
                         onChangeText={setEmail}
@@ -68,7 +84,7 @@ export const LoginScreen = ({ navigation }: any) => {
                     <View style={styles.passwordContainer}>
                         <TextInput
                             style={[styles.input, styles.passwordInput, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
-                            placeholder="Password"
+                            placeholder={t('auth.password')}
                             placeholderTextColor={theme.textSecondary}
                             value={password}
                             onChangeText={setPassword}
@@ -91,12 +107,14 @@ export const LoginScreen = ({ navigation }: any) => {
                     {loading ? (
                         <ActivityIndicator color={theme.background} />
                     ) : (
-                        <Text style={[styles.buttonText, { color: theme.background }]}>Login</Text>
+                        <Text style={[styles.buttonText, { color: theme.background }]}>{t('auth.login_button')}</Text>
                     )}
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-                    <Text style={[styles.linkText, { color: theme.primary }]}>Don't have an account? Sign Up</Text>
+                    <Text style={[styles.linkText, { color: theme.primary }]}>
+                        {t('auth.dont_have_account')} {t('auth.signup_link')}
+                    </Text>
                 </TouchableOpacity>
 
                 <View style={styles.debugContainer}>

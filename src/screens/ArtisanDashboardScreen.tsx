@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Switch, Image, ScrollView, Al
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { BookingService } from '../services/booking';
+import { ArtisanService } from '../services/artisan';
 import { useTheme } from '../context/ThemeContext';
 import { colors } from '../constants/colors';
 
@@ -22,6 +23,7 @@ export const ArtisanDashboardScreen = ({ navigation }: any) => {
             if (userStr) {
                 const user = JSON.parse(userStr);
                 setUserProfile(user.profile);
+                setIsAvailable(user.profile.isAvailable !== undefined ? user.profile.isAvailable : true);
             }
 
             // Load Bookings
@@ -84,11 +86,35 @@ export const ArtisanDashboardScreen = ({ navigation }: any) => {
                         <View>
                             <Text style={[styles.availabilityTitle, dynamicStyles.text]}>Availability</Text>
                             <Text style={[styles.availabilitySubtitle, dynamicStyles.textSecondary]}>Set status to get job requests</Text>
-                            <Text style={[styles.statusText, { color: theme.primary }]}>You are {isAvailable ? 'Online' : 'Offline'}</Text>
+                            <Text style={[styles.statusText, { color: theme.primary }]}>You are {isAvailable ? 'Available' : 'Not Available'}</Text>
                         </View>
                         <Switch
                             value={isAvailable}
-                            onValueChange={setIsAvailable}
+                            onValueChange={async (value) => {
+                                // Optimistic update
+                                setIsAvailable(value);
+                                try {
+                                    const userStr = await AsyncStorage.getItem('user');
+                                    if (userStr) {
+                                        const user = JSON.parse(userStr);
+                                        const userId = user.id || user._id;
+
+                                        // Update Backend
+                                        await ArtisanService.updateProfile(userId, { isAvailable: value });
+
+                                        // Update Local Storage
+                                        const updatedUser = {
+                                            ...user,
+                                            profile: { ...user.profile, isAvailable: value }
+                                        };
+                                        await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
+                                    }
+                                } catch (error) {
+                                    console.error('Failed to update availability:', error);
+                                    Alert.alert('Error', 'Failed to update availability status.');
+                                    setIsAvailable(!value); // Revert on failure
+                                }
+                            }}
                             trackColor={{ false: '#767577', true: theme.primary }}
                             thumbColor={theme.white}
                             ios_backgroundColor="#3e3e3e"

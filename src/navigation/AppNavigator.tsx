@@ -9,6 +9,7 @@ import { BookingScreen } from '../screens/BookingScreen';
 import { SplashScreen } from '../screens/SplashScreen';
 import { OnboardingScreen } from '../screens/OnboardingScreen';
 import { WelcomeScreen } from '../screens/WelcomeScreen';
+import { LanguageSelectionScreen } from '../screens/LanguageSelectionScreen';
 import { RoleSelectionScreen } from '../screens/RoleSelectionScreen';
 import { ArtisanProfileScreen } from '../screens/ArtisanProfileScreen';
 import { ClientProfileScreen } from '../screens/ClientProfileScreen';
@@ -17,6 +18,8 @@ import { ArtisanDashboardScreen } from '../screens/ArtisanDashboardScreen';
 import { ArtisanJobRequestScreen } from '../screens/ArtisanJobRequestScreen';
 import { ChatScreen } from '../screens/ChatScreen';
 import { BookingConfirmationScreen } from '../screens/BookingConfirmationScreen';
+import { BookingDetailsScreen } from '../screens/BookingDetailsScreen';
+import { ArtisanJobDetailsScreen } from '../screens/ArtisanJobDetailsScreen';
 import { FilterSortScreen } from '../screens/FilterSortScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { ArtisanEditProfileScreen } from '../screens/ArtisanEditProfileScreen';
@@ -27,6 +30,8 @@ import { LanguageScreen } from '../screens/LanguageScreen';
 import { HelpSupportScreen } from '../screens/HelpSupportScreen';
 import { ArtisanQuestionnaireScreen } from '../screens/ArtisanQuestionnaireScreen';
 import { ArtisanIDUploadScreen } from '../screens/ArtisanIDUploadScreen';
+import { PhoneVerificationScreen } from '../screens/PhoneVerificationScreen';
+import { ReviewScreen } from '../screens/ReviewScreen';
 import { ClientNavigator } from './ClientNavigator';
 import { ArtisanNavigator } from './ArtisanNavigator';
 
@@ -50,6 +55,8 @@ export const AppNavigator = () => {
                 <Stack.Screen name="Splash" component={SplashScreen} />
                 <Stack.Screen name="Onboarding" component={OnboardingScreen} />
                 <Stack.Screen name="Welcome" component={WelcomeScreen} />
+                <Stack.Screen name="LanguageSelection" component={LanguageSelectionScreen} />
+                <Stack.Screen name="PhoneVerification" component={PhoneVerificationScreen} />
                 <Stack.Screen name="RoleSelection" component={RoleSelectionScreen} />
                 <Stack.Screen name="Login" component={LoginScreen} />
                 <Stack.Screen name="Signup" component={SignupScreen} />
@@ -60,16 +67,16 @@ export const AppNavigator = () => {
                 <Stack.Screen name="ArtisanProfile" component={ArtisanProfileScreen} />
                 <Stack.Screen name="ClientProfile" component={ClientProfileScreen} />
                 <Stack.Screen name="ClientServiceHistory" component={ClientServiceHistoryScreen} />
-
-                {/* Artisan Flow */}
-
+                <Stack.Screen name="BookingDetails" component={BookingDetailsScreen} />
+                <Stack.Screen name="Review" component={ReviewScreen} />
 
                 {/* Artisan Flow */}
                 <Stack.Screen name="ArtisanOnboarding" component={ArtisanOnboardingScreen} />
                 <Stack.Screen name="ArtisanQuestionnaire" component={ArtisanQuestionnaireScreen} />
                 <Stack.Screen name="ArtisanIDUpload" component={ArtisanIDUploadScreen} />
-                <Stack.Screen name="ArtisanDashboard" component={ArtisanDashboardScreen} />
                 <Stack.Screen name="ArtisanJobRequest" component={ArtisanJobRequestScreen} />
+                <Stack.Screen name="ArtisanJobDetails" component={ArtisanJobDetailsScreen} />
+                <Stack.Screen name="ArtisanDashboard" component={ArtisanDashboardScreen} />
                 <Stack.Screen name="ArtisanEditProfile" component={ArtisanEditProfileScreen} />
 
                 {/* Shared */}

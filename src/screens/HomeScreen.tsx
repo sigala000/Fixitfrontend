@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, TextInput, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, TextInput, ScrollView, Dimensions } from 'react-native';
+import { Video, ResizeMode } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { ArtisanService } from '../services/artisan';
+import { LocationService } from '../services/location';
 import { Artisan } from '../types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 
 const CATEGORIES = [
-    { id: '1', name: 'Plumber', icon: 'wrench-outline' },
+    { id: '1', name: 'Plumber', icon: 'construct-outline' },
     { id: '2', name: 'Electrician', icon: 'flash-outline' },
     { id: '3', name: 'Carpenter', icon: 'hammer-outline' },
     { id: '4', name: 'Painter', icon: 'color-palette-outline' },
@@ -22,6 +24,7 @@ export const HomeScreen = ({ navigation }: any) => {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [userName, setUserName] = useState('');
+    const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
     const loadUserName = async () => {
         try {
@@ -49,7 +52,17 @@ export const HomeScreen = ({ navigation }: any) => {
     const loadArtisans = async () => {
         setLoading(true);
         try {
-            const data = await ArtisanService.getAllArtisans(selectedCategory || undefined);
+            let lat, long;
+
+            // Try to get current location
+            const location = await LocationService.getCurrentLocation();
+            if (location) {
+                lat = location.latitude;
+                long = location.longitude;
+                setUserLocation(location);
+            }
+
+            const data = await ArtisanService.getAllArtisans(selectedCategory || undefined, lat, long);
             setArtisans(data);
         } catch (error) {
             console.error('Failed to load artisans', error);
@@ -96,7 +109,9 @@ export const HomeScreen = ({ navigation }: any) => {
                 <Text style={[styles.nearbyName, { color: '#FFFFFF' }]}>{item.profile.name}</Text>
                 <View style={styles.nearbyInfo}>
                     <Text style={styles.nearbyRating}><Ionicons name="star" size={12} color="#FFD700" /> {item.profile.rating || 0}</Text>
-                    <Text style={[styles.nearbyDistance, { color: '#FFFFFF' }]}>| 2.5 km away</Text>
+                    <Text style={[styles.nearbyDistance, { color: '#FFFFFF' }]}>
+                        | {item.distance !== undefined ? `${item.distance.toFixed(1)} km away` : 'Distance unavailable'}
+                    </Text>
                 </View>
             </View>
         </TouchableOpacity>
@@ -111,7 +126,9 @@ export const HomeScreen = ({ navigation }: any) => {
             <View style={styles.featuredInfo}>
                 <Text style={[styles.featuredName, { color: theme.text }]}>{item.profile.name}</Text>
                 <Text style={[styles.featuredSkill, { color: theme.textSecondary }]}>{item.profile.skills?.[0] || 'Artisan'}</Text>
-                <Text style={[styles.featuredDistance, { color: theme.textSecondary }]}><Ionicons name="location-outline" size={12} color={theme.primary} /> 2.5 km away</Text>
+                <Text style={[styles.featuredDistance, { color: theme.textSecondary }]}>
+                    <Ionicons name="location-outline" size={12} color={theme.primary} /> {item.distance !== undefined ? `${item.distance.toFixed(1)} km away` : 'Distance unknown'}
+                </Text>
             </View>
             <View style={styles.featuredAction}>
                 <Ionicons name="chevron-forward" size={24} color={theme.textSecondary} />
@@ -159,6 +176,15 @@ export const HomeScreen = ({ navigation }: any) => {
                         horizontal
                         showsHorizontalScrollIndicator={false}
                         contentContainerStyle={styles.categoriesList}
+                        ListFooterComponent={
+                            <TouchableOpacity
+                                style={[styles.moreButton, { backgroundColor: theme.surface, borderColor: theme.border }]}
+                                onPress={() => navigation.navigate('Categories')}
+                            >
+                                <Ionicons name="grid-outline" size={20} color={theme.primary} />
+                                <Text style={[styles.moreText, { color: theme.textSecondary }]}>More</Text>
+                            </TouchableOpacity>
+                        }
                     />
                 </View>
 
@@ -188,16 +214,21 @@ export const HomeScreen = ({ navigation }: any) => {
 
                 <View style={styles.section}>
                     <View style={styles.sectionTitleRow}>
-                        <Text style={[styles.sectionTitle, { color: theme.text }]}>Featured Artisans</Text>
-                        <TouchableOpacity>
-                            <Text style={[styles.seeAllText, { color: theme.primary }]}>See All</Text>
-                        </TouchableOpacity>
+                        <Text style={[styles.sectionTitle, { color: theme.text }]}>How to use the App</Text>
                     </View>
-                    {filteredArtisans.map((item: any) => (
-                        <View key={item._id} style={{ marginBottom: 10 }}>
-                            {renderFeaturedArtisan({ item })}
-                        </View>
-                    ))}
+                    <View style={[styles.videoContainer, { backgroundColor: theme.surface }]}>
+                        <Video
+                            source={require('../../assets/videos/tutorial.mp4')}
+                            rate={1.0}
+                            volume={1.0}
+                            isMuted={false}
+                            resizeMode={ResizeMode.CONTAIN}
+                            shouldPlay={false}
+                            isLooping
+                            useNativeControls
+                            style={styles.video}
+                        />
+                    </View>
                 </View>
                 <View style={{ height: 80 }} />
             </ScrollView>
@@ -274,6 +305,21 @@ const styles = StyleSheet.create({
     categoryName: {
         fontSize: 14,
         fontWeight: '600',
+    },
+    moreButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        borderRadius: 20,
+        borderWidth: 1,
+        justifyContent: 'center',
+        height: 52, // Match category card height roughly
+    },
+    moreText: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginLeft: 8,
     },
     section: {
         marginBottom: 25,
@@ -360,6 +406,23 @@ const styles = StyleSheet.create({
     },
     featuredAction: {
         justifyContent: 'center',
+    },
+    videoContainer: {
+        width: '100%',
+        aspectRatio: 16 / 9,
+        borderRadius: 15,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: 'rgba(0,0,0,0.1)',
+        elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+    },
+    video: {
+        width: '100%',
+        height: '100%',
     },
     emptyStateContainer: {
         alignItems: 'center',

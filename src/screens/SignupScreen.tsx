@@ -2,18 +2,32 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthService } from '../services/auth';
+import { UserService } from '../services/user';
+import { LocationService } from '../services/location';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 import { API_URL } from '../config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const SignupScreen = ({ route, navigation }: any) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
     const { role: initialRole } = route.params || {};
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [phone, setPhone] = useState('');
     const [role, setRole] = useState<'customer' | 'artisan'>(initialRole === 'client' ? 'customer' : initialRole === 'artisan' ? 'artisan' : 'customer');
     const [loading, setLoading] = useState(false);
+
+    React.useEffect(() => {
+        const getPhone = async () => {
+            const storedPhone = await AsyncStorage.getItem('verifiedPhoneNumber');
+            if (storedPhone) setPhone(storedPhone);
+        };
+        getPhone();
+    }, []);
 
     const handleSignup = async () => {
         if (!name || !email || !password) {
@@ -27,7 +41,8 @@ export const SignupScreen = ({ route, navigation }: any) => {
                 name,
                 email,
                 password,
-                role
+                role,
+                phone
             });
 
             // Navigate directly to appropriate tabs based on role
@@ -35,6 +50,18 @@ export const SignupScreen = ({ route, navigation }: any) => {
                 navigation.replace('ArtisanQuestionnaire'); // New artisans should go to questionnaire
             } else {
                 navigation.replace('ClientTabs');
+            }
+
+            try {
+                const location = await LocationService.getCurrentLocation();
+                if (location) {
+                    const userId = response.user.id || response.user._id;
+                    await UserService.updateProfile(userId, {
+                        location: [location.longitude, location.latitude]
+                    });
+                }
+            } catch (locError) {
+                console.error('Failed to update location after signup:', locError);
             }
         } catch (error: any) {
             Alert.alert('Error', error.message);
@@ -49,35 +76,35 @@ export const SignupScreen = ({ route, navigation }: any) => {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
             <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}>
-                <Text style={[styles.title, { color: theme.text }]}>Create Account</Text>
-                <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Join FixIt today</Text>
+                <Text style={[styles.title, { color: theme.text }]}>{t('signup.title')}</Text>
+                <Text style={[styles.subtitle, { color: theme.textSecondary }]}>{t('signup.subtitle')}</Text>
 
                 <View style={[styles.roleContainer, { backgroundColor: theme.surface }]}>
                     <TouchableOpacity
                         style={[styles.roleButton, role === 'customer' && { backgroundColor: theme.border }]}
                         onPress={() => setRole('customer')}
                     >
-                        <Text style={[styles.roleText, { color: theme.textSecondary }, role === 'customer' && { color: theme.primary }]}>Customer</Text>
+                        <Text style={[styles.roleText, { color: theme.textSecondary }, role === 'customer' && { color: theme.primary }]}>{t('signup.customer')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[styles.roleButton, role === 'artisan' && { backgroundColor: theme.border }]}
                         onPress={() => setRole('artisan')}
                     >
-                        <Text style={[styles.roleText, { color: theme.textSecondary }, role === 'artisan' && { color: theme.primary }]}>Artisan</Text>
+                        <Text style={[styles.roleText, { color: theme.textSecondary }, role === 'artisan' && { color: theme.primary }]}>{t('signup.artisan')}</Text>
                     </TouchableOpacity>
                 </View>
 
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
-                        placeholder="Full Name"
+                        placeholder={t('signup.full_name')}
                         placeholderTextColor={theme.textSecondary}
                         value={name}
                         onChangeText={setName}
                     />
                     <TextInput
                         style={[styles.input, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
-                        placeholder="Email"
+                        placeholder={t('auth.email')}
                         placeholderTextColor={theme.textSecondary}
                         value={email}
                         onChangeText={setEmail}
@@ -87,7 +114,7 @@ export const SignupScreen = ({ route, navigation }: any) => {
                     <View style={styles.passwordContainer}>
                         <TextInput
                             style={[styles.input, styles.passwordInput, { backgroundColor: theme.surface, color: theme.text, borderColor: theme.border }]}
-                            placeholder="Password"
+                            placeholder={t('auth.password')}
                             placeholderTextColor={theme.textSecondary}
                             value={password}
                             onChangeText={setPassword}
@@ -110,12 +137,12 @@ export const SignupScreen = ({ route, navigation }: any) => {
                     {loading ? (
                         <ActivityIndicator color={theme.background} />
                     ) : (
-                        <Text style={[styles.buttonText, { color: theme.background }]}>Sign Up</Text>
+                        <Text style={[styles.buttonText, { color: theme.background }]}>{t('signup.button')}</Text>
                     )}
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                    <Text style={[styles.linkText, { color: theme.primary }]}>Already have an account? Login</Text>
+                    <Text style={[styles.linkText, { color: theme.primary }]}>{t('auth.already_have_account')} {t('auth.login_link')}</Text>
                 </TouchableOpacity>
 
                 <View style={styles.debugContainer}>

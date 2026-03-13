@@ -1,0 +1,131 @@
+{
+    "welcome": {
+        "title": "Bienvenue sur FixIt",
+        "subtitle": "Le moyen le plus rapide de trouver des professionnels qualifiés de confiance au Cameroun.",
+        "get_started": "Commencer"
+    },
+    "language_selection": {
+        "title": "Choisissez la langue",
+        "subtitle": "Choisissez votre langue préférée pour continuer",
+        "english": "Anglais",
+        "french": "Français",
+        "continue": "Continuer"
+    },
+    "role_selection": {
+        "title": "Bienvenue sur FixIt",
+        "subtitle": "Trouvez de la main-d'œuvre qualifiée ou offrez vos services.",
+        "i_am_a": "Je suis un...",
+        "customer": "Client",
+        "artisan": "Artisan",
+        "or": "OU",
+        "google": "Continuer avec Google",
+        "email_signup": "S'inscrire avec Email"
+    },
+    "auth": {
+        "email": "Email",
+        "password": "Mot de passe",
+        "login_button": "Connexion",
+        "signup_link": "S'inscrire",
+        "login_link": "Connexion",
+        "dont_have_account": "Vous n'avez pas de compte ?",
+        "already_have_account": "Vous avez déjà un compte ?"
+    },
+    "login": {
+        "title": "Bon retour",
+        "subtitle": "Connectez-vous pour continuer"
+    },
+    "signup": {
+        "title": "Créer un compte",
+        "subtitle": "Rejoignez FixIt aujourd'hui",
+        "customer": "Client",
+        "artisan": "Artisan",
+        "full_name": "Nom complet",
+        "button": "S'inscrire"
+    },
+    "artisan_questionnaire": {
+        "title": "Collecte de données",
+        "subtitle": "Veuillez répondre aux questions suivantes pour vérifier votre expertise.",
+        "placeholder": "Votre réponse...",
+        "button": "Suivant: Télécharger l'ID",
+        "incomplete": "Incomplet",
+        "incomplete_message": "Veuillez répondre aux 10 questions pour continuer.",
+        "success": "Succès",
+        "success_message": "Questionnaire terminé !",
+        "next": "Suivant",
+        "questions": [
+            {
+                "question": "Combien d’années d’expérience pratique avez-vous dans votre métier principal ?",
+                "options": [
+                    "Moins d’un an (Apprenti)",
+                    "1 à 3 ans (Niveau junior)",
+                    "3 à 5 ans (Intermédiaire)",
+                    "5 à 10 ans (Expérimenté)",
+                    "Plus de 10 ans (Niveau expert)"
+                ]
+            },
+            {
+                "question": "Quel type de projets réalisez-vous généralement ?",
+                "options": [
+                    "Petites réparations et travaux d’entretien",
+                    "Projets résidentiels de taille moyenne",
+                    "Grands projets résidentiels",
+                    "Je travaille sur des projets de toutes tailles"
+                ]
+            },
+            {
+                "question": "Comment fixez-vous généralement vos tarifs ?",
+                "options": [
+                    "Prix fixe par projet (après inspection)",
+                    "Tarif journalier",
+                    "Tarif horaire",
+                    "Prix négocié selon l’ampleur des travaux"
+                ]
+            },
+            {
+                "question": "Disposez-vous de vos propres outils et équipements nécessaires à votre métier ?",
+                "options": [
+                    "Oui, je possède tous les outils principaux nécessaires",
+                    "Je possède les outils de base mais je loue les équipements spécialisés",
+                    "J’utilise les outils fournis par le client",
+                    "Je travaille sous la supervision d’un entrepreneur qui fournit les outils"
+                ]
+            },
+            {
+                "question": "Comment gérez-vous les plaintes ou les corrections des clients ?",
+                "options": [
+                    "Je reviens toujours corriger les problèmes sans frais supplémentaires (si c’est de ma faute)",
+                    "J’examine le problème et je négocie une solution",
+                    "Je facture des frais supplémentaires pour les corrections",
+                    "Je traite rarement les plaintes directement"
+                ]
+            }
+        ]
+    },
+    "artisan_id_upload": {
+        "title": "Vérifiez votre identité",
+        "subtitle": "Veuillez télécharger des photos claires de votre carte d'identité et une photo de profil.",
+        "id_front": "Recto de la carte d'identité",
+        "id_back": "Verso de la carte d'identité",
+        "profile_pic": "Photo de profil",
+        "button": "Terminer l'intégration",
+        "uploading": "Téléchargement...",
+        "error": "Erreur",
+        "error_message": "Veuillez télécharger toutes les photos requises.",
+        "success": "Succès",
+        "success_message": "ID téléchargé avec succès !",
+        "finish": "Terminer"
+    },
+    "phone_verification": {
+        "title": "Numéro de téléphone",
+        "verify_title": "Vérifier le téléphone",
+        "subtitle": "Nous enverrons un code de vérification à ce numéro",
+        "verify_subtitle": "Entrez le code à 6 chiffres envoyé à votre téléphone",
+        "placeholder": "+237 ...",
+        "code_placeholder": "Code de vérification",
+        "send_code": "Envoyer le code",
+        "verify": "Vérifier",
+        "change_number": "Changer le numéro de téléphone",
+        "invalid_number": "Veuillez entrer un numéro de téléphone valide",
+        "invalid_code": "Veuillez entrer un code de vérification à 6 chiffres"
+    }
+}

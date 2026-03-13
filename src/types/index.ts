@@ -20,4 +20,5 @@ export interface User {
 
 export interface Artisan extends User {
     role: 'artisan';
+    distance?: number;
 }

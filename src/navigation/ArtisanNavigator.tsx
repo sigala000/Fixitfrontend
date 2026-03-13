@@ -1,10 +1,12 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { ArtisanDashboardScreen } from '../screens/ArtisanDashboardScreen';
+import { ArtisanJobsScreen } from '../screens/ArtisanJobsScreen';
 import { ArtisanPortfolioScreen } from '../screens/ArtisanPortfolioScreen';
 import { ArtisanProfileScreen } from '../screens/ArtisanProfileScreen'; // Settings/Profile
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../constants/colors';
+import { Platform } from 'react-native';
 
 const Tab = createBottomTabNavigator();
 
@@ -22,13 +24,33 @@ export const ArtisanNavigator = () => {
                 headerShown: false,
                 tabBarStyle: {
                     backgroundColor: colors.surface,
-                    borderTopColor: '#333',
+                    borderTopColor: 'transparent',
                     height: 60,
-                    paddingBottom: 10,
-                    paddingTop: 10,
+                    paddingBottom: Platform.OS === 'ios' ? 15 : 8,
+                    paddingTop: 8,
+                    borderTopWidth: 0,
+                    elevation: 15,
+                    shadowColor: '#000',
+                    shadowOffset: {
+                        width: 0,
+                        height: -4,
+                    },
+                    shadowOpacity: 0.25,
+                    shadowRadius: 12,
+                    borderRadius: 20,
+                    marginHorizontal: 30,
+                    marginBottom: Platform.OS === 'ios' ? 20 : 10,
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
                 },
                 tabBarActiveTintColor: colors.primary,
                 tabBarInactiveTintColor: colors.textSecondary,
+                tabBarShowLabel: false,
+                tabBarItemStyle: {
+                    paddingVertical: 8,
+                },
                 tabBarIcon: ({ focused, color, size }) => {
                     let iconName: any;
 
@@ -51,10 +73,9 @@ export const ArtisanNavigator = () => {
                 component={ArtisanDashboardScreen}
                 options={{ title: 'Dashboard' }}
             />
-            {/* Ideally this is a separate Jobs List screen, reusing Dashboard for now or we can make a simple placeholder */}
             <Tab.Screen
                 name="JobsTab"
-                component={ArtisanDashboardScreen}
+                component={ArtisanJobsScreen}
                 options={{ title: 'Jobs' }}
             />
             <Tab.Screen

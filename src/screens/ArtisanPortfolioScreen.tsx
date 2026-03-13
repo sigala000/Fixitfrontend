@@ -38,13 +38,21 @@ export const ArtisanPortfolioScreen = ({ navigation }: any) => {
     };
 
     const handleAddImage = async () => {
+        // Request permissions first
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission Denied', 'We need access to your photos to upload portfolio images.');
+            return;
+        }
+
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
             quality: 0.8,
+            aspect: [1, 1], // Square aspect ratio
         });
 
-        if (!result.canceled) {
+        if (!result.canceled && result.assets && result.assets.length > 0) {
             uploadAndAddToPortfolio(result.assets[0].uri);
         }
     };
@@ -55,8 +63,13 @@ export const ArtisanPortfolioScreen = ({ navigation }: any) => {
             const uploadedUrl = await ArtisanService.uploadImage(uri);
             const newPortfolio = [...portfolioImages, uploadedUrl];
             await updatePortfolio(newPortfolio);
-        } catch (error) {
-            Alert.alert('Upload Failed', 'Failed to upload portfolio image');
+            Alert.alert('Success', 'Image uploaded successfully!');
+        } catch (error: any) {
+            console.error('Upload error:', error);
+            Alert.alert(
+                'Upload Failed', 
+                error.message || 'Failed to upload portfolio image. Please check your connection and try again.'
+            );
         } finally {
             setUploading(false);
         }

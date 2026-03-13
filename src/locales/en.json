@@ -1,0 +1,131 @@
+{
+    "welcome": {
+        "title": "Welcome to FixIt",
+        "subtitle": "The fastest way to find trusted skilled professionals in Cameroon.",
+        "get_started": "Get Started"
+    },
+    "language_selection": {
+        "title": "Choose Language",
+        "subtitle": "Pick your preferred language to continue",
+        "english": "English",
+        "french": "French",
+        "continue": "Continue"
+    },
+    "role_selection": {
+        "title": "Welcome to FixIt",
+        "subtitle": "Find skilled labor or offer your services.",
+        "i_am_a": "I am a...",
+        "customer": "Customer",
+        "artisan": "Artisan",
+        "or": "OR",
+        "google": "Continue with Google",
+        "email_signup": "Sign Up with Email"
+    },
+    "auth": {
+        "email": "Email",
+        "password": "Password",
+        "login_button": "Login",
+        "signup_link": "Sign Up",
+        "login_link": "Login",
+        "dont_have_account": "Don't have an account?",
+        "already_have_account": "Already have an account?"
+    },
+    "login": {
+        "title": "Welcome Back",
+        "subtitle": "Sign in to continue"
+    },
+    "signup": {
+        "title": "Create Account",
+        "subtitle": "Join FixIt today",
+        "customer": "Customer",
+        "artisan": "Artisan",
+        "full_name": "Full Name",
+        "button": "Sign Up"
+    },
+    "artisan_questionnaire": {
+        "title": "Data Collection",
+        "subtitle": "Please answer the following questions to verify your expertise.",
+        "placeholder": "Your answer...",
+        "button": "Next: Upload ID",
+        "incomplete": "Incomplete",
+        "incomplete_message": "Please answer all 10 questions to proceed.",
+        "success": "Success",
+        "success_message": "Questionnaire completed!",
+        "next": "Next",
+        "questions": [
+            {
+                "question": "How many years of hands-on experience do you have in your primary trade?",
+                "options": [
+                    "Less than 1 year (Apprentice)",
+                    "1–3 years (Junior level)",
+                    "3–5 years (Intermediate)",
+                    "5–10 years (Experienced)",
+                    "Over 10 years (Master level)"
+                ]
+            },
+            {
+                "question": "What type of projects do you typically handle?",
+                "options": [
+                    "Small repairs and maintenance jobs",
+                    "Medium residential projects",
+                    "Large residential projects",
+                    "I work on all project sizes"
+                ]
+            },
+            {
+                "question": "How do you usually price your work?",
+                "options": [
+                    "Fixed price per job (after inspection)",
+                    "Daily labor rate",
+                    "Hourly rate",
+                    "Negotiated price based on scope"
+                ]
+            },
+            {
+                "question": "Do you have your own tools and equipment required for your trade?",
+                "options": [
+                    "Yes, I own all major tools needed",
+                    "I own basic tools but rent specialized equipment",
+                    "I rely on client-provided tools",
+                    "I work under a contractor who provides tools"
+                ]
+            },
+            {
+                "question": "How do you handle client complaints or corrections?",
+                "options": [
+                    "I always return to fix issues at no extra cost (if it’s my fault)",
+                    "I review the issue and negotiate a solution",
+                    "I charge additional fees for corrections",
+                    "I rarely handle complaints directly"
+                ]
+            }
+        ]
+    },
+    "artisan_id_upload": {
+        "title": "Verify Your Identity",
+        "subtitle": "Please upload clear photos of your ID card and a profile picture.",
+        "id_front": "ID Card Front",
+        "id_back": "ID Card Back",
+        "profile_pic": "Profile Picture",
+        "button": "Complete Onboarding",
+        "uploading": "Uploading...",
+        "error": "Error",
+        "error_message": "Please upload all required photos.",
+        "success": "Success",
+        "success_message": "ID Uploaded successfully!",
+        "finish": "Finish"
+    },
+    "phone_verification": {
+        "title": "Phone Number",
+        "verify_title": "Verify Phone",
+        "subtitle": "We will send a verification code to this number",
+        "verify_subtitle": "Enter the 6-digit code sent to your phone",
+        "placeholder": "+237 ...",
+        "code_placeholder": "Verification Code",
+        "send_code": "Send Code",
+        "verify": "Verify",
+        "change_number": "Change Phone Number",
+        "invalid_number": "Please enter a valid phone number",
+        "invalid_code": "Please enter a 6-digit verification code"
+    }
+}

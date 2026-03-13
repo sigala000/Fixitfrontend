@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 
 export const WelcomeScreen = ({ navigation }: any) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
 
     return (
@@ -11,17 +13,17 @@ export const WelcomeScreen = ({ navigation }: any) => {
                 <View style={styles.iconContainer}>
                     <Text style={styles.iconText}>🛠️</Text>
                 </View>
-                <Text style={[styles.title, { color: theme.text }]}>Welcome to FixIt237</Text>
+                <Text style={[styles.title, { color: theme.text }]}>{t('welcome.title')}</Text>
                 <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-                    The fastest way to find trusted skilled professionals in Cameroon.
+                    {t('welcome.subtitle')}
                 </Text>
             </View>
             <View style={styles.footer}>
                 <TouchableOpacity
                     style={[styles.button, { backgroundColor: theme.primary }]}
-                    onPress={() => navigation.navigate('RoleSelection')}
+                    onPress={() => navigation.navigate('LanguageSelection')}
                 >
-                    <Text style={[styles.buttonText, { color: theme.background }]}>Get Started</Text>
+                    <Text style={[styles.buttonText, { color: theme.background }]}>{t('welcome.get_started')}</Text>
                 </TouchableOpacity>
             </View>
         </View>

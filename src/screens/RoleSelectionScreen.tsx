@@ -1,8 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../context/ThemeContext';
 
 export const RoleSelectionScreen = ({ navigation }: any) => {
+    const { t } = useTranslation();
     const { theme } = useTheme();
 
     return (
@@ -11,21 +13,21 @@ export const RoleSelectionScreen = ({ navigation }: any) => {
                 <View style={[styles.iconContainer, { backgroundColor: theme.surface, borderColor: theme.primary }]}>
                     <Text style={styles.iconText}>🔧</Text>
                 </View>
-                <Text style={[styles.title, { color: theme.text }]}>Welcome to FixIt237</Text>
-                <Text style={[styles.subtitle, { color: theme.textSecondary }]}>Find skilled labor or offer your services.</Text>
+                <Text style={[styles.title, { color: theme.text }]}>{t('role_selection.title')}</Text>
+                <Text style={[styles.subtitle, { color: theme.textSecondary }]}>{t('role_selection.subtitle')}</Text>
             </View>
 
             <View style={styles.content}>
-                <Text style={[styles.label, { color: theme.text }]}>I am a...</Text>
+                <Text style={[styles.label, { color: theme.text }]}>{t('role_selection.i_am_a')}</Text>
                 <View style={styles.roleContainer}>
                     <TouchableOpacity
                         style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.border }]}
-                        onPress={() => navigation.navigate('Signup', { role: 'client' })}
+                        onPress={() => navigation.navigate('Signup', { role: 'customer' })}
                     >
                         <View style={[styles.iconCircle, { backgroundColor: theme.primary }]}>
                             <Text style={styles.cardIcon}>👤</Text>
                         </View>
-                        <Text style={[styles.cardText, { color: theme.text }]}>Client</Text>
+                        <Text style={[styles.cardText, { color: theme.text }]}>{t('role_selection.customer')}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -35,32 +37,21 @@ export const RoleSelectionScreen = ({ navigation }: any) => {
                         <View style={[styles.iconCircle, { backgroundColor: theme.surface === '#FFFFFF' ? '#F0F0F0' : '#2C2C2C' }]}>
                             <Text style={styles.cardIcon}>🛠️</Text>
                         </View>
-                        <Text style={[styles.cardText, { color: theme.text }]}>Artisan</Text>
+                        <Text style={[styles.cardText, { color: theme.text }]}>{t('role_selection.artisan')}</Text>
                     </TouchableOpacity>
                 </View>
-
-                <View style={styles.dividerContainer}>
-                    <View style={[styles.line, { backgroundColor: theme.border }]} />
-                    <Text style={[styles.orText, { color: theme.textSecondary }]}>OR</Text>
-                    <View style={[styles.line, { backgroundColor: theme.border }]} />
-                </View>
-
-                <TouchableOpacity style={[styles.googleButton, { backgroundColor: theme.surface, borderColor: theme.border }]}>
-                    <Text style={[styles.googleButtonIcon, { color: theme.text }]}>G</Text>
-                    <Text style={[styles.googleButtonText, { color: theme.text }]}>Continue with Google</Text>
-                </TouchableOpacity>
 
                 <TouchableOpacity
                     style={[styles.emailButton, { backgroundColor: theme.primary }]}
                     onPress={() => navigation.navigate('Signup')}
                 >
                     <Text style={[styles.emailButtonIcon, { color: theme.background }]}>✉️</Text>
-                    <Text style={[styles.emailButtonText, { color: theme.background }]}>Sign Up with Email</Text>
+                    <Text style={[styles.emailButtonText, { color: theme.background }]}>{t('role_selection.email_signup')}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={() => navigation.navigate('Login')}>
                     <Text style={[styles.loginText, { color: theme.textSecondary }]}>
-                        Already have an account? <Text style={[styles.loginLink, { color: theme.primary }]}>Log in</Text>
+                        {t('auth.already_have_account')} <Text style={[styles.loginLink, { color: theme.primary }]}>{t('auth.login_link')}</Text>
                     </Text>
                 </TouchableOpacity>
             </View>
@@ -131,36 +122,6 @@ const styles = StyleSheet.create({
     },
     cardText: {
         fontWeight: 'bold',
-    },
-    dividerContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 30,
-    },
-    line: {
-        flex: 1,
-        height: 1,
-    },
-    orText: {
-        marginHorizontal: 10,
-        fontSize: 12,
-    },
-    googleButton: {
-        flexDirection: 'row',
-        padding: 15,
-        borderRadius: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 15,
-        borderWidth: 1,
-    },
-    googleButtonIcon: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginRight: 10,
-    },
-    googleButtonText: {
-        fontWeight: '600',
     },
     emailButton: {
         flexDirection: 'row',

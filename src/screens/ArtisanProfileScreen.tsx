@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Switch } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthService } from '../services/auth';
 import { ArtisanService } from '../services/artisan';
+import { UserService } from '../services/user';
+import { ReviewService } from '../services/review';
 import { useTheme } from '../context/ThemeContext';
 import { colors } from '../constants/colors';
 
@@ -12,11 +14,59 @@ export const ArtisanProfileScreen = ({ route, navigation }: any) => {
     const [isOwner, setIsOwner] = useState(false);
     const [userData, setUserData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [reviews, setReviews] = useState<any[]>([]);
     const { theme, toggleTheme, isDarkMode } = useTheme();
 
     useEffect(() => {
         checkOwnership();
-    }, [route.params]);
+
+        // Re-fetch on focus to catch real-time status changes
+        const unsubscribe = navigation.addListener('focus', () => {
+            fetchFreshArtisanData();
+        });
+
+        return unsubscribe;
+    }, [route.params, navigation]);
+
+    // Fetch reviews whenever userData changes
+    useEffect(() => {
+        if (userData) {
+            const artisanId = userData._id || userData.id;
+            if (artisanId) {
+                fetchReviews(artisanId);
+            }
+        }
+    }, [userData]);
+
+    const fetchReviews = async (artisanId: string) => {
+        try {
+            const data = await ReviewService.getArtisanReviews(artisanId);
+            setReviews(data);
+        } catch (error) {
+            console.error('Failed to fetch reviews:', error);
+        }
+    };
+
+    const fetchFreshArtisanData = async () => {
+        const passedArtisan = route.params?.artisan;
+        const targetId = passedArtisan?._id || passedArtisan?.id;
+
+        if (targetId) {
+            try {
+                const freshData = await UserService.getUserProfile(targetId);
+                if (freshData) {
+                    setUserData(freshData);
+                }
+            } catch (error) {
+                console.error('Failed to re-fetch artisan data:', error);
+            }
+        } else if (isOwner) {
+            const userStr = await AsyncStorage.getItem('user');
+            if (userStr) {
+                setUserData(JSON.parse(userStr));
+            }
+        }
+    };
 
     const checkOwnership = async () => {
         setLoading(true);
@@ -165,6 +215,15 @@ export const ArtisanProfileScreen = ({ route, navigation }: any) => {
                             <Ionicons name="chevron-forward" size={24} color={theme.textSecondary} />
                         </TouchableOpacity>
 
+                        {/* Phone Number Info */}
+                        <View style={[styles.menuItem, dynamicStyles.surface]}>
+                            <Ionicons name="call-outline" size={24} color={theme.text} />
+                            <View style={{ flex: 1, marginLeft: 15 }}>
+                                <Text style={[styles.infoLabel, dynamicStyles.textSecondary]}>Phone Number</Text>
+                                <Text style={[styles.menuText, dynamicStyles.text, { marginLeft: 0 }]}>{profile.phone || 'Not set'}</Text>
+                            </View>
+                        </View>
+
                         <TouchableOpacity style={[styles.menuItem, dynamicStyles.surface]}>
                             <Ionicons name="notifications-outline" size={24} color={theme.text} />
                             <Text style={[styles.menuText, dynamicStyles.text]}>Notifications</Text>
@@ -186,6 +245,31 @@ export const ArtisanProfileScreen = ({ route, navigation }: any) => {
                             <Ionicons name="log-out-outline" size={24} color={theme.error || '#FF4444'} />
                             <Text style={[styles.menuText, { color: theme.error || '#FF4444' }]}>Logout</Text>
                         </TouchableOpacity>
+
+                        {/* My Reviews Section (Owner View) */}
+                        <View style={[styles.section, { marginTop: 20 }]}>
+                            <Text style={[styles.sectionTitle, dynamicStyles.text]}>My Reviews ({reviews.length})</Text>
+                            {reviews.length > 0 ? (
+                                reviews.map((review: any, idx: number) => (
+                                    <View key={idx} style={[styles.reviewCard, dynamicStyles.surface]}>
+                                        <View style={styles.reviewHeader}>
+                                            <Image source={{ uri: review.reviewer?.profile?.avatar || 'https://via.placeholder.com/40' }} style={styles.reviewAvatar} />
+                                            <View>
+                                                <Text style={[styles.reviewUser, dynamicStyles.text]}>{review.reviewer?.profile?.name || 'Client'}</Text>
+                                                <View style={{ flexDirection: 'row' }}>
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <Ionicons key={i} name="star" size={12} color={i < (review.rating || 0) ? "#FFD700" : theme.textSecondary} />
+                                                    ))}
+                                                </View>
+                                            </View>
+                                        </View>
+                                        <Text style={[styles.reviewText, dynamicStyles.textSecondary]}>"{review.comment}"</Text>
+                                    </View>
+                                ))
+                            ) : (
+                                <Text style={{ color: theme.textSecondary, fontStyle: 'italic' }}>No reviews yet.</Text>
+                            )}
+                        </View>
                     </View>
                 ) : (
                     <>
@@ -208,6 +292,14 @@ export const ArtisanProfileScreen = ({ route, navigation }: any) => {
                         </View>
 
                         {/* Viewing Details Sections */}
+                        <View style={styles.section}>
+                            <Text style={[styles.sectionTitle, dynamicStyles.text]}>Contact Information</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <Ionicons name="call-outline" size={18} color={theme.primary} style={{ marginRight: 10 }} />
+                                <Text style={[styles.bioText, dynamicStyles.textSecondary]}>{profile.phone || 'No phone number available.'}</Text>
+                            </View>
+                        </View>
+
                         <View style={styles.section}>
                             <Text style={[styles.sectionTitle, dynamicStyles.text]}>About</Text>
                             <Text style={[styles.bioText, dynamicStyles.textSecondary]}>{profile.bio || 'No bio available.'}</Text>
@@ -243,13 +335,13 @@ export const ArtisanProfileScreen = ({ route, navigation }: any) => {
                         {/* Reviews Section */}
                         <View style={styles.section}>
                             <Text style={[styles.sectionTitle, dynamicStyles.text]}>Reviews</Text>
-                            {userData.reviews && userData.reviews.length > 0 ? (
-                                userData.reviews.map((review: any, idx: number) => (
+                            {reviews.length > 0 ? (
+                                reviews.map((review: any, idx: number) => (
                                     <View key={idx} style={[styles.reviewCard, dynamicStyles.surface]}>
                                         <View style={styles.reviewHeader}>
-                                            <Image source={{ uri: review.userAvatar || 'https://via.placeholder.com/40' }} style={styles.reviewAvatar} />
+                                            <Image source={{ uri: review.reviewer?.profile?.avatar || 'https://via.placeholder.com/40' }} style={styles.reviewAvatar} />
                                             <View>
-                                                <Text style={[styles.reviewUser, dynamicStyles.text]}>{review.userName || 'Client'}</Text>
+                                                <Text style={[styles.reviewUser, dynamicStyles.text]}>{review.reviewer?.profile?.name || 'Client'}</Text>
                                                 <View style={{ flexDirection: 'row' }}>
                                                     {[...Array(5)].map((_, i) => (
                                                         <Ionicons key={i} name="star" size={12} color={i < (review.rating || 0) ? "#FFD700" : theme.textSecondary} />
@@ -494,5 +586,9 @@ const styles = StyleSheet.create({
     statusText: {
         fontSize: 12,
         fontWeight: 'bold',
+    },
+    infoLabel: {
+        fontSize: 12,
+        fontWeight: '600',
     },
 });

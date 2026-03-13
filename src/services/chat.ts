@@ -80,5 +80,33 @@ export const ChatService = {
             console.error('Error fetching conversations:', error);
             throw error;
         }
+    },
+
+    markAsRead: async (senderId: string) => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(`${CHAT_URL}/read`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ senderId }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                if (response.status === 401) {
+                    await AsyncStorage.multiRemove(['token', 'user']);
+                    throw new Error('Session expired. Please login again.');
+                }
+                throw new Error(errorData.message || 'Failed to mark messages as read');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error marking messages as read:', error);
+            throw error;
+        }
     }
 };

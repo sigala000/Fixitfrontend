@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert, ActivityIndicator, Pla
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
+import * as Location from 'expo-location';
 import { BookingService } from '../services/booking';
 
 export const BookingScreen = ({ route, navigation }: any) => {
@@ -40,13 +41,88 @@ export const BookingScreen = ({ route, navigation }: any) => {
 
         setLoading(true);
         try {
-            // Mock location for now
-            const location = {
-                address: 'My Current Location',
-                coordinates: [0, 0]
+            // Get user's current location
+            let location: {
+                address: string;
+                coordinates: number[];
+                fullAddress?: string;
             };
+            try {
+                // Request location permission and get current location
+                const locationPermission = await Location.requestForegroundPermissionsAsync();
+                if (locationPermission.status === 'granted') {
+                    const currentLocation = await Location.getCurrentPositionAsync({});
+                    const { latitude, longitude } = currentLocation.coords;
+                    
+                    // Use OpenStreetMap Nominatim reverse geocoding
+                    try {
+                        const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`, {
+                            headers: {
+                                'User-Agent': 'FixitApp/1.0' // Required by OSM policy
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
+                        const contentType = response.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/json')) {
+                            throw new Error('Response is not JSON');
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (data && data.address) {
+                            // Extract meaningful location information
+                            const suburb = data.address.suburb || data.address.neighbourhood;
+                            const city = data.address.city || data.address.town || data.address.village;
+                            const municipality = data.address.municipality;
+                            
+                            // Create readable location string
+                            let address = '';
+                            if (suburb) address = suburb;
+                            else if (municipality) address = municipality;
+                            else if (city) address = city;
+                            else address = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`;
+                            
+                            location = {
+                                address: address,
+                                coordinates: [latitude, longitude],
+                                fullAddress: data.display_name || address
+                            };
+                        } else {
+                            // Fallback to coordinates if geocoding fails
+                            location = {
+                                address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+                                coordinates: [latitude, longitude]
+                            };
+                        }
+                    } catch (geocodingError) {
+                        console.error('Geocoding failed:', geocodingError);
+                        // Fallback to coordinates
+                        location = {
+                            address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+                            coordinates: [latitude, longitude]
+                        };
+                    }
+                } else {
+                    // Fallback to mock location if permission denied
+                    location = {
+                        address: 'Location permission denied',
+                        coordinates: [0, 0]
+                    };
+                }
+            } catch (error) {
+                console.error('Error getting location:', error);
+                // Fallback location
+                location = {
+                    address: 'Unable to get location',
+                    coordinates: [0, 0]
+                };
+            }
 
-            await BookingService.createBooking({
+            const bookingResponse = await BookingService.createBooking({
                 artisanId: artisan._id,
                 serviceType: artisan.profile.skills?.[0] || 'General Service',
                 date: date,
@@ -57,9 +133,13 @@ export const BookingScreen = ({ route, navigation }: any) => {
 
             navigation.navigate('BookingConfirmation', {
                 bookingDetails: {
+                    bookingId: bookingResponse._id || bookingResponse.id,
                     artisan: artisan,
                     date: date.toISOString(),
-                    time: selectedTimeSlot
+                    time: selectedTimeSlot,
+                    serviceType: artisan.profile.skills?.[0] || 'General Service',
+                    location: location,
+                    description: 'Service request from mobile app'
                 }
             });
         } catch (error: any) {
@@ -113,7 +193,14 @@ export const BookingScreen = ({ route, navigation }: any) => {
                                     style={[styles.androidDateButton, { backgroundColor: theme.inputBackground, borderColor: theme.border }]}
                                     onPress={() => setShow(true)}
                                 >
-                                    <Text style={[styles.androidDateText, { color: theme.text }]}>Select Date</Text>
+                                    <Text style={[styles.androidDateText, { color: theme.text }]}>
+                                        {date.toLocaleDateString('en-US', { 
+                                            weekday: 'short', 
+                                            month: 'short', 
+                                            day: 'numeric', 
+                                            year: 'numeric' 
+                                        })}
+                                    </Text>
                                     <Ionicons name="calendar" size={24} color={theme.primary} />
                                 </TouchableOpacity>
 
@@ -159,6 +246,29 @@ export const BookingScreen = ({ route, navigation }: any) => {
                 <View style={styles.infoSummary}>
                     <Text style={[styles.summaryText, { color: theme.textSecondary }]}>All times are in WAT</Text>
                 </View>
+
+                {(selectedTimeSlot) && (
+                    <View style={[styles.selectedSummaryContainer, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+                        <Text style={[styles.selectedSummaryTitle, { color: theme.text }]}>Selected Appointment</Text>
+                        <View style={styles.selectedSummaryRow}>
+                            <View style={styles.selectedSummaryItem}>
+                                <Ionicons name="calendar-outline" size={20} color={theme.primary} />
+                                <Text style={[styles.selectedSummaryText, { color: theme.text }]}>
+                                    {date.toLocaleDateString('en-US', { 
+                                        weekday: 'long', 
+                                        month: 'long', 
+                                        day: 'numeric', 
+                                        year: 'numeric' 
+                                    })}
+                                </Text>
+                            </View>
+                            <View style={styles.selectedSummaryItem}>
+                                <Ionicons name="time-outline" size={20} color={theme.primary} />
+                                <Text style={[styles.selectedSummaryText, { color: theme.text }]}>{selectedTimeSlot}</Text>
+                            </View>
+                        </View>
+                    </View>
+                )}
             </ScrollView>
 
             <View style={[styles.footer, { backgroundColor: theme.background, borderTopColor: theme.border }]}>
@@ -271,5 +381,29 @@ const styles = StyleSheet.create({
     androidDateText: {
         fontSize: 16,
         fontWeight: '600',
+    },
+    selectedSummaryContainer: {
+        borderRadius: 12,
+        padding: 15,
+        marginTop: 10,
+        marginBottom: 20,
+        borderWidth: 1,
+    },
+    selectedSummaryTitle: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    selectedSummaryRow: {
+        gap: 10,
+    },
+    selectedSummaryItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    selectedSummaryText: {
+        fontSize: 14,
+        fontWeight: '500',
     },
 });

@@ -54,7 +54,7 @@ export const AuthService = {
 
     signup: async (userData: any) => {
         try {
-            const { email, password, name, role } = userData;
+            const { email, password, name, role, phone } = userData;
 
             // 1. Create user in Firebase
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -73,7 +73,8 @@ export const AuthService = {
                 body: JSON.stringify({
                     token: idToken,
                     role,
-                    name
+                    name,
+                    phone
                 }),
             });
 

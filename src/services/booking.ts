@@ -93,5 +93,33 @@ export const BookingService = {
             console.error('Error updating booking status:', error);
             throw error;
         }
+    },
+
+    updateBookingDescription: async (bookingId: string, description: string) => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(`${BOOKING_URL}/${bookingId}/description`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({ description }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                if (response.status === 401) {
+                    await AsyncStorage.multiRemove(['token', 'user']);
+                    throw new Error('Session expired. Please login again.');
+                }
+                throw new Error(errorData.message || 'Failed to update booking description');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error updating booking description:', error);
+            throw error;
+        }
     }
 };

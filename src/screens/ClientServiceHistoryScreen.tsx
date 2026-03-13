@@ -1,27 +1,52 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Image, RefreshControl, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../constants/colors';
 
 import { BookingService } from '../services/booking';
+import { ReviewService } from '../services/review';
 import { useFocusEffect } from '@react-navigation/native';
 
 export const ClientServiceHistoryScreen = ({ navigation }: any) => {
     const [selectedTab, setSelectedTab] = useState<'pending' | 'accepted' | 'completed' | 'declined'>('accepted');
     const [bookings, setBookings] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
+    const [refreshing, setRefreshing] = useState(false);
+    const [reviewedBookings, setReviewedBookings] = useState<Set<string>>(new Set());
 
     const fetchBookings = async () => {
         setLoading(true);
         try {
             const data = await BookingService.getBookings();
             setBookings(data);
+            // Check which completed bookings already have reviews
+            const completedBookings = data.filter((b: any) => b.status === 'completed');
+            const reviewed = new Set<string>();
+            for (const b of completedBookings) {
+                try {
+                    const review = await ReviewService.getBookingReview(b._id);
+                    if (review) reviewed.add(b._id);
+                } catch {}
+            }
+            setReviewedBookings(reviewed);
         } catch (error) {
             console.error('Failed to fetch bookings', error);
         } finally {
             setLoading(false);
         }
     };
+
+    const onRefresh = useCallback(async () => {
+        setRefreshing(true);
+        try {
+            const data = await BookingService.getBookings();
+            setBookings(data);
+        } catch (error) {
+            console.error('Failed to refresh bookings', error);
+        } finally {
+            setRefreshing(false);
+        }
+    }, []);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -41,7 +66,11 @@ export const ClientServiceHistoryScreen = ({ navigation }: any) => {
         const servicePrice = '$50.00'; // Placeholder as price isn't in model yet
 
         return (
-            <View style={styles.card}>
+            <TouchableOpacity 
+                style={styles.card}
+                onPress={() => navigation.navigate('BookingDetails', { booking: item })}
+                activeOpacity={0.7}
+            >
                 <View style={styles.cardHeader}>
                     <Image
                         source={{ uri: item.artisan?.profile?.avatar || 'https://via.placeholder.com/50' }}
@@ -79,25 +108,67 @@ export const ClientServiceHistoryScreen = ({ navigation }: any) => {
 
                     <View style={styles.actionButtons}>
                         {item.status === 'accepted' && (
-                            <TouchableOpacity
-                                style={styles.rebookButton}
-                                onPress={() => navigation.navigate('Chat', {
-                                    recipientId: item.artisan?._id,
-                                    recipientName: item.artisan?.profile?.name,
-                                    recipientAvatar: item.artisan?.profile?.avatar
-                                })}
-                            >
-                                <Text style={styles.rebookButtonText}>Message</Text>
-                            </TouchableOpacity>
+                            <>
+                                <TouchableOpacity
+                                    style={[styles.reviewButton, { backgroundColor: '#00CC66' }]}
+                                    onPress={() => {
+                                        Alert.alert(
+                                            'Mark as Complete',
+                                            'Are you sure the job has been completed?',
+                                            [
+                                                { text: 'Cancel', style: 'cancel' },
+                                                {
+                                                    text: 'Yes, Complete',
+                                                    onPress: async () => {
+                                                        try {
+                                                            await BookingService.updateBookingStatus(item._id, 'completed');
+                                                            fetchBookings();
+                                                        } catch (error: any) {
+                                                            Alert.alert('Error', error.message || 'Failed to update status');
+                                                        }
+                                                    }
+                                                }
+                                            ]
+                                        );
+                                    }}
+                                >
+                                    <Text style={[styles.reviewButtonText, { color: '#fff' }]}>Mark Complete</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={styles.rebookButton}
+                                    onPress={() => navigation.navigate('Chat', {
+                                        recipientId: item.artisan?._id,
+                                        recipientName: item.artisan?.profile?.name,
+                                        recipientAvatar: item.artisan?.profile?.avatar
+                                    })}
+                                >
+                                    <Text style={styles.rebookButtonText}>Message</Text>
+                                </TouchableOpacity>
+                            </>
                         )}
                         {item.status === 'completed' && (
-                            <TouchableOpacity style={styles.reviewButton}>
-                                <Text style={styles.reviewButtonText}>Review</Text>
-                            </TouchableOpacity>
+                            reviewedBookings.has(item._id) ? (
+                                <View style={[styles.reviewButton, { backgroundColor: 'rgba(0, 204, 102, 0.2)' }]}>
+                                    <Ionicons name="checkmark-circle" size={14} color="#00CC66" style={{ marginRight: 4 }} />
+                                    <Text style={[styles.reviewButtonText, { color: '#00CC66' }]}>Reviewed</Text>
+                                </View>
+                            ) : (
+                                <TouchableOpacity
+                                    style={[styles.reviewButton, { backgroundColor: colors.primary }]}
+                                    onPress={() => navigation.navigate('Review', {
+                                        bookingId: item._id,
+                                        artisanId: item.artisan?._id,
+                                        artisanName: item.artisan?.profile?.name,
+                                        artisanAvatar: item.artisan?.profile?.avatar
+                                    })}
+                                >
+                                    <Text style={[styles.reviewButtonText, { color: colors.black }]}>Review</Text>
+                                </TouchableOpacity>
+                            )
                         )}
                     </View>
                 </View>
-            </View>
+            </TouchableOpacity>
         );
     };
 
@@ -132,8 +203,9 @@ export const ClientServiceHistoryScreen = ({ navigation }: any) => {
                 renderItem={renderItem}
                 keyExtractor={item => item._id}
                 contentContainerStyle={styles.listContainer}
-                refreshing={loading}
-                onRefresh={fetchBookings}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
                 ListEmptyComponent={
                     <View style={styles.emptyContainer}>
                         <Text style={styles.emptyText}>No {selectedTab} bookings found.</Text>

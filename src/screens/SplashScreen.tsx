@@ -58,7 +58,7 @@ export const SplashScreen = () => {
             <View style={styles.iconContainer}>
                 {/*  Using the text emoji as placeholder, replace with actual Logo image if available */}
                 <Text style={styles.iconText}>🛠️</Text>
-                <Text style={styles.title}>FixIt237</Text>
+                <Text style={styles.title}>FixIt</Text>
             </View>
         </View>
     );
