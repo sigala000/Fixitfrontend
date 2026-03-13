@@ -5,9 +5,9 @@ import { Platform } from 'react-native';
 // For Android Emulator, use 'http://10.0.2.2:8000/api'
 // For iOS Simulator, 'http://localhost:8000/api' works
 
-// const BASE_URL = 'https://fixitbackend-dzn1.onrender.com';
+const BASE_URL = 'https://fixitbackend-dzn1.onrender.com';
 // const BASE_URL = 'http://192.168.43.5:8000'; // Local testing
-const BASE_URL = 'http://10.194.245.198:8000'; // Local testing
+// const BASE_URL = 'http://10.194.245.198:8000'; // Local testing
 
 
 export const API_URL = `${BASE_URL}/api`;

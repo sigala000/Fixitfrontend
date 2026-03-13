@@ -8,3 +8,7 @@ node_modules
 
 expo-env.d.ts
 # @end expo-cli
+# Firebase configuration files
+GoogleService-Info.plist
+google-services.json
+
